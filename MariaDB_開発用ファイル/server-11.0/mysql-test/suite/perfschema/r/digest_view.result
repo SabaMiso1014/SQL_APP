@@ -1,0 +1,266 @@
+CREATE TABLE test.v1 (a int, b int);
+INSERT INTO test.v1 VALUES (1, 100), (2, 200), (3, 300);
+CREATE TABLE test.t1 (a int, b int);
+INSERT INTO test.t1 VALUES (1, 100), (2, 200), (3, 300);
+TRUNCATE TABLE performance_schema.events_statements_summary_by_digest;
+EXPLAIN EXTENDED SELECT * from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	100.00	
+Warnings:
+Note	1003	select `test`.`v1`.`a` AS `a`,`test`.`v1`.`b` AS `b` from `test`.`v1`
+EXPLAIN EXTENDED SELECT * from test.v1 where a = 1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	100.00	Using where
+Warnings:
+Note	1003	select `test`.`v1`.`a` AS `a`,`test`.`v1`.`b` AS `b` from `test`.`v1` where `test`.`v1`.`a` = 1
+EXPLAIN EXTENDED SELECT * from test.v1 where b > 100;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	100.00	Using where
+Warnings:
+Note	1003	select `test`.`v1`.`a` AS `a`,`test`.`v1`.`b` AS `b` from `test`.`v1` where `test`.`v1`.`b` > 100
+EXPLAIN EXTENDED SELECT a, b from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	100.00	
+Warnings:
+Note	1003	select `test`.`v1`.`a` AS `a`,`test`.`v1`.`b` AS `b` from `test`.`v1`
+EXPLAIN EXTENDED SELECT b, a from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	100.00	
+Warnings:
+Note	1003	select `test`.`v1`.`b` AS `b`,`test`.`v1`.`a` AS `a` from `test`.`v1`
+SELECT * from test.v1;
+a	b
+1	100
+2	200
+3	300
+SELECT * from test.v1 where a = 1;
+a	b
+1	100
+SELECT * from test.v1 where b > 100;
+a	b
+2	200
+3	300
+SELECT a, b from test.v1;
+a	b
+1	100
+2	200
+3	300
+SELECT b, a from test.v1;
+b	a
+100	1
+200	2
+300	3
+#
+# DIGESTS SEEN ON TABLE
+#
+SELECT SCHEMA_NAME, DIGEST_TEXT, COUNT_STAR
+FROM performance_schema.events_statements_summary_by_digest
+ORDER BY DIGEST_TEXT;
+SCHEMA_NAME	DIGEST_TEXT	COUNT_STAR
+test	EXPLAIN EXTENDED SELECT * FROM `test` . `v1` 	1
+test	EXPLAIN EXTENDED SELECT * FROM `test` . `v1` WHERE `a` = ? 	1
+test	EXPLAIN EXTENDED SELECT * FROM `test` . `v1` WHERE `b` > ? 	1
+test	EXPLAIN EXTENDED SELECT `a` , `b` FROM `test` . `v1` 	1
+test	EXPLAIN EXTENDED SELECT `b` , `a` FROM `test` . `v1` 	1
+test	SELECT * FROM `test` . `v1` 	1
+test	SELECT * FROM `test` . `v1` WHERE `a` = ? 	1
+test	SELECT * FROM `test` . `v1` WHERE `b` > ? 	1
+test	SELECT `a` , `b` FROM `test` . `v1` 	1
+test	SELECT `b` , `a` FROM `test` . `v1` 	1
+test	SHOW WARNINGS 	5
+test	TRUNCATE TABLE `performance_schema` . `events_statements_summary_by_digest` 	1
+DROP TABLE test.v1;
+CREATE VIEW test.v1 AS SELECT * FROM test.t1;
+EXPLAIN EXTENDED SELECT * from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	100.00	
+Warnings:
+Note	1003	select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1`
+EXPLAIN EXTENDED SELECT * from test.v1 where a = 1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	100.00	Using where
+Warnings:
+Note	1003	select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where `test`.`t1`.`a` = 1
+EXPLAIN EXTENDED SELECT * from test.v1 where b > 100;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	100.00	Using where
+Warnings:
+Note	1003	select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1` where `test`.`t1`.`b` > 100
+EXPLAIN EXTENDED SELECT a, b from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	100.00	
+Warnings:
+Note	1003	select `test`.`t1`.`a` AS `a`,`test`.`t1`.`b` AS `b` from `test`.`t1`
+EXPLAIN EXTENDED SELECT b, a from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	100.00	
+Warnings:
+Note	1003	select `test`.`t1`.`b` AS `b`,`test`.`t1`.`a` AS `a` from `test`.`t1`
+SELECT * from test.v1;
+a	b
+1	100
+2	200
+3	300
+SELECT * from test.v1 where a = 1;
+a	b
+1	100
+SELECT * from test.v1 where b > 100;
+a	b
+2	200
+3	300
+SELECT a, b from test.v1;
+a	b
+1	100
+2	200
+3	300
+SELECT b, a from test.v1;
+b	a
+100	1
+200	2
+300	3
+#
+# DIGESTS SEEN ON VIEW
+#
+SELECT SCHEMA_NAME, DIGEST_TEXT, COUNT_STAR
+FROM performance_schema.events_statements_summary_by_digest
+ORDER BY DIGEST_TEXT;
+SCHEMA_NAME	DIGEST_TEXT	COUNT_STAR
+test	CREATE VIEW `test` . `v1` AS SELECT * FROM `test` . `t1` 	1
+test	DROP TABLE `test` . `v1` 	1
+test	EXPLAIN EXTENDED SELECT * FROM `test` . `v1` 	2
+test	EXPLAIN EXTENDED SELECT * FROM `test` . `v1` WHERE `a` = ? 	2
+test	EXPLAIN EXTENDED SELECT * FROM `test` . `v1` WHERE `b` > ? 	2
+test	EXPLAIN EXTENDED SELECT `a` , `b` FROM `test` . `v1` 	2
+test	EXPLAIN EXTENDED SELECT `b` , `a` FROM `test` . `v1` 	2
+test	SELECT * FROM `test` . `v1` 	2
+test	SELECT * FROM `test` . `v1` WHERE `a` = ? 	2
+test	SELECT * FROM `test` . `v1` WHERE `b` > ? 	2
+test	SELECT SCHEMA_NAME , `DIGEST_TEXT` , `COUNT_STAR` FROM `performance_schema` . `events_statements_summary_by_digest` ORDER BY `DIGEST_TEXT` 	1
+test	SELECT `a` , `b` FROM `test` . `v1` 	2
+test	SELECT `b` , `a` FROM `test` . `v1` 	2
+test	SHOW WARNINGS 	10
+test	TRUNCATE TABLE `performance_schema` . `events_statements_summary_by_digest` 	1
+DROP VIEW test.v1;
+DROP TABLE test.t1;
+CREATE TABLE test.v1 (a int, b int);
+INSERT INTO test.v1 VALUES (1, 100), (2, 200), (3, 300);
+CREATE TABLE test.t1 (a int, b int);
+INSERT INTO test.t1 VALUES (1, 100), (2, 200), (3, 300);
+TRUNCATE TABLE performance_schema.events_statements_summary_by_digest;
+EXPLAIN SELECT * from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	
+EXPLAIN SELECT * from test.v1 where a = 1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	Using where
+EXPLAIN SELECT * from test.v1 where b > 100;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	Using where
+EXPLAIN SELECT a, b from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	
+EXPLAIN SELECT b, a from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	v1	ALL	NULL	NULL	NULL	NULL	3	
+SELECT * from test.v1;
+a	b
+1	100
+2	200
+3	300
+SELECT * from test.v1 where a = 1;
+a	b
+1	100
+SELECT * from test.v1 where b > 100;
+a	b
+2	200
+3	300
+SELECT a, b from test.v1;
+a	b
+1	100
+2	200
+3	300
+SELECT b, a from test.v1;
+b	a
+100	1
+200	2
+300	3
+#
+# DIGESTS SEEN ON TABLE
+#
+SELECT SCHEMA_NAME, DIGEST, DIGEST_TEXT, COUNT_STAR
+FROM performance_schema.events_statements_summary_by_digest
+ORDER BY DIGEST_TEXT;
+SCHEMA_NAME	DIGEST	DIGEST_TEXT	COUNT_STAR
+test	333a53e537d74bf74dd28c78ad5b23dd	EXPLAIN SELECT * FROM `test` . `v1` 	1
+test	1fb578da66e6583bae8e64061486f1b1	EXPLAIN SELECT * FROM `test` . `v1` WHERE `a` = ? 	1
+test	923bca939a55826e231e1335016ba418	EXPLAIN SELECT * FROM `test` . `v1` WHERE `b` > ? 	1
+test	6fa6d75432fd499d1c7d6f964c8310a2	EXPLAIN SELECT `a` , `b` FROM `test` . `v1` 	1
+test	3421da1ec8ecb8cac97e12a0609f73cb	EXPLAIN SELECT `b` , `a` FROM `test` . `v1` 	1
+test	c2f68fd41bfbf3acd52eb5e7306b0c00	SELECT * FROM `test` . `v1` 	1
+test	dd68812cbe4c1ed5a38921222981f8c5	SELECT * FROM `test` . `v1` WHERE `a` = ? 	1
+test	7563bcc32c6d0d872c8d9f0bf7717e6a	SELECT * FROM `test` . `v1` WHERE `b` > ? 	1
+test	0817c53833dc6adbca581e8fe4c598c7	SELECT `a` , `b` FROM `test` . `v1` 	1
+test	a5f13903c70812ae08fa8c084e9cd503	SELECT `b` , `a` FROM `test` . `v1` 	1
+test	66b14a14f2a42e1335dd28dfad8ea084	TRUNCATE TABLE `performance_schema` . `events_statements_summary_by_digest` 	1
+DROP TABLE test.v1;
+CREATE VIEW test.v1 AS SELECT * FROM test.t1;
+EXPLAIN SELECT * from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	
+EXPLAIN SELECT * from test.v1 where a = 1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	Using where
+EXPLAIN SELECT * from test.v1 where b > 100;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	Using where
+EXPLAIN SELECT a, b from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	
+EXPLAIN SELECT b, a from test.v1;
+id	select_type	table	type	possible_keys	key	key_len	ref	rows	Extra
+1	SIMPLE	t1	ALL	NULL	NULL	NULL	NULL	3	
+SELECT * from test.v1;
+a	b
+1	100
+2	200
+3	300
+SELECT * from test.v1 where a = 1;
+a	b
+1	100
+SELECT * from test.v1 where b > 100;
+a	b
+2	200
+3	300
+SELECT a, b from test.v1;
+a	b
+1	100
+2	200
+3	300
+SELECT b, a from test.v1;
+b	a
+100	1
+200	2
+300	3
+#
+# DIGESTS SEEN ON VIEW
+#
+SELECT SCHEMA_NAME, DIGEST, DIGEST_TEXT, COUNT_STAR
+FROM performance_schema.events_statements_summary_by_digest
+ORDER BY DIGEST_TEXT;
+SCHEMA_NAME	DIGEST	DIGEST_TEXT	COUNT_STAR
+test	98531b331031b84ddfbb2de8b601a704	CREATE VIEW `test` . `v1` AS SELECT * FROM `test` . `t1` 	1
+test	5352d7d117e97fecd312e354e9e290ce	DROP TABLE `test` . `v1` 	1
+test	333a53e537d74bf74dd28c78ad5b23dd	EXPLAIN SELECT * FROM `test` . `v1` 	2
+test	1fb578da66e6583bae8e64061486f1b1	EXPLAIN SELECT * FROM `test` . `v1` WHERE `a` = ? 	2
+test	923bca939a55826e231e1335016ba418	EXPLAIN SELECT * FROM `test` . `v1` WHERE `b` > ? 	2
+test	6fa6d75432fd499d1c7d6f964c8310a2	EXPLAIN SELECT `a` , `b` FROM `test` . `v1` 	2
+test	3421da1ec8ecb8cac97e12a0609f73cb	EXPLAIN SELECT `b` , `a` FROM `test` . `v1` 	2
+test	c2f68fd41bfbf3acd52eb5e7306b0c00	SELECT * FROM `test` . `v1` 	2
+test	dd68812cbe4c1ed5a38921222981f8c5	SELECT * FROM `test` . `v1` WHERE `a` = ? 	2
+test	7563bcc32c6d0d872c8d9f0bf7717e6a	SELECT * FROM `test` . `v1` WHERE `b` > ? 	2
+test	21c19dd7ef5b894f3e32d0585cb3007f	SELECT SCHEMA_NAME , `DIGEST` , `DIGEST_TEXT` , `COUNT_STAR` FROM `performance_schema` . `events_statements_summary_by_digest` ORDER BY `DIGEST_TEXT` 	1
+test	0817c53833dc6adbca581e8fe4c598c7	SELECT `a` , `b` FROM `test` . `v1` 	2
+test	a5f13903c70812ae08fa8c084e9cd503	SELECT `b` , `a` FROM `test` . `v1` 	2
+test	66b14a14f2a42e1335dd28dfad8ea084	TRUNCATE TABLE `performance_schema` . `events_statements_summary_by_digest` 	1
+DROP VIEW test.v1;
+DROP TABLE test.t1;
